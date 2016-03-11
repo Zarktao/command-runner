@@ -16,8 +16,8 @@ Runner aims for providing a simple multi-synchronized-task execution framework.
 
 ### Usage
 1. Define a subclass of AbstractTaskRunner to implement the method of executing the synchronized task. When run() method returns, the task will be marked as done.
-2. Call RunnerUtils.addRunner to add your runner to the framework. It's sequence sensitive. Framework would choose the first runner which returns true in checkCommand() to run your command.
-3. Create your Instance then submit, and it will run in Java thread pool.
+2. Do 'new RunnerManager()' to manage the whole runner pool. Call runnerManager.addRunner() to add your defined runner to this manager. It's sequence sensitive. Manager would choose the first runner which returns true in getRunnerClass() to run your command.
+3. Create your Instance then submit to your manager, and it will run in this Java thread pool.
 4. You can get your job's status, result, log etc. from instance.
-1. Job.setLogOutputStream to assign a outputStream to this job.
-5. Implement the PersistenceHelper, then call RunnerUtils.setPersistenceHelper. If PersistenceHelper is defined in the framework, the framework will use these method to do persistence jobs. If not, the instances will be stored in memory.
+5. Job.setLogOutputStream to assign a outputStream to this job.
+6. Implement the PersistenceHelper, then call RunnerManager.setPersistenceHelper. If PersistenceHelper is defined in the framework, the framework will use these method to do persistence jobs. If not, the instances will be temporarily stored in memory.
