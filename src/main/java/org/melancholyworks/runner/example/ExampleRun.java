@@ -1,6 +1,7 @@
 package org.melancholyworks.runner.example;
 
 import org.codehaus.jackson.map.ObjectMapper;
+import org.melancholyworks.runner.RunnerException;
 import org.melancholyworks.runner.RunnersManager;
 import org.melancholyworks.runner.job.Job;
 import org.melancholyworks.runner.task.Task;
@@ -12,16 +13,19 @@ import java.util.Properties;
  * @author ZarkTao
  */
 public class ExampleRun {
-    public static void main(String[] args) throws InterruptedException, IOException {
-        RunnersManager.addRunner(SleepRunner.class);
+    public static void main(String[] args) throws InterruptedException, IOException, RunnerException {
+        RunnersManager manager = new RunnersManager();
+        manager.addRunner(SleepRunner.class);
         String instanceID = "job-1";
         Job instance = new Job(instanceID, "demo", new String[]{"sleep"}, new Properties());
-        instance.submit();
+        instance.submitTo(manager);
+        Thread.sleep(1000L);
+        manager.shutdown();
         while (true) {
             if (instance.isEnd()) {
                 System.out.println("============== JSON ===============");
                 ObjectMapper mapper = new ObjectMapper();
-                String json = mapper.writeValueAsString(instance);
+                String json = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(instance);
                 System.out.println(json);
                 Job restore = mapper.readValue(json, Job.class);
                 System.out.println("============== LOG ===============");
@@ -34,5 +38,6 @@ public class ExampleRun {
             }
             Thread.sleep(1000L);
         }
+        //manager.shutdown();
     }
 }

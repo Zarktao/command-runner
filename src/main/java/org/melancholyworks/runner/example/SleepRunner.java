@@ -8,6 +8,7 @@ import org.melancholyworks.runner.task.Task;
  */
 public class SleepRunner extends AbstractTaskRunner {
     boolean isSuccess = false;
+    boolean isStop = false;
 
     public SleepRunner(Task task) {
         super(task);
@@ -21,10 +22,18 @@ public class SleepRunner extends AbstractTaskRunner {
     @Override
     public int run() {
         for (int i = 0; i < 5; i++) {
+            if (isStop) {
+                appendLogLine("killed");
+                isSuccess = false;
+                task.setResult("Dead");
+                return -1;
+            }
             try {
                 Thread.sleep(1000L);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            } catch (Exception e) {
+                appendLogLine("Interuptted by {0}", e);
+                task.setResult("Dead");
+                return -1;
             }
             appendLogLine("Sleep at {0}", i);
         }
@@ -41,6 +50,11 @@ public class SleepRunner extends AbstractTaskRunner {
     @Override
     public boolean isSuccess() {
         return isSuccess;
+    }
+
+    @Override
+    public void kill() {
+        isStop = true;
     }
 
     @Override

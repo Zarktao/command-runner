@@ -1,7 +1,9 @@
 package org.melancholyworks.runner.job;
 
 import org.apache.commons.lang.StringUtils;
+import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.annotate.JsonIgnore;
+import org.codehaus.jackson.annotate.JsonSetter;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.melancholyworks.runner.RunnerException;
 import org.melancholyworks.runner.RunnersManager;
@@ -59,6 +61,12 @@ public class Job {
     //for json mapper to restore this
     private Job(){}
 
+    //for json mapper to restore this
+    @JsonSetter
+    private void setTasks(Task[] tasks){
+        this.tasks = tasks;
+    }
+
     private void setTasks(String[] commands) {
         LinkedList<String> strList = new LinkedList<>();
         for (String s : commands)
@@ -74,10 +82,10 @@ public class Job {
         this.status = status;
     }
 
-    public void submit() {
+    public void submitTo(RunnersManager manager) {
         submitTime = new Date();
-        prepareToRun();
-        RunnersManager.submit(this);
+        prepareToRun(manager);
+        manager.submit(this);
     }
 
     public void kill() throws RunnerException {
@@ -85,11 +93,11 @@ public class Job {
             throw new RunnerException("Job not be submitted can not be killed.");
         else if (status.isEnd())
             throw new RunnerException("Job is already stopped.");
-        RunnersManager.kill(this);
+        runner.stop();
     }
 
-    private void prepareToRun() {
-        runner = new JobRunner(this);
+    private void prepareToRun(RunnersManager manager) {
+        runner = new JobRunner(this, manager);
     }
 
     public JobRunner getRunner() {

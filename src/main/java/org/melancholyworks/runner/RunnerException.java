@@ -10,4 +10,8 @@ public class RunnerException extends Exception {
     public RunnerException(String s) {
         super(s);
     }
+
+    public RunnerException(String s, Exception e) {
+        super(s, e);
+    }
 }

@@ -18,6 +18,9 @@ public class Task {
     private String result;
     private String command;
 
+    //for json mapper to restore this
+    private Task(){}
+
     public Task(Job instance, String taskID, String command) {
         this.instance = instance;
         this.command = command;

@@ -86,6 +86,8 @@ public abstract class AbstractTaskRunner {
      */
     public abstract boolean isSuccess();
 
+    public abstract void kill();
+
     protected void appendLogLine(String line, Object... objects) {
         if (writer != null) {
             writer.appendLine(getPrefix() + MessageFormat.format(line, objects));

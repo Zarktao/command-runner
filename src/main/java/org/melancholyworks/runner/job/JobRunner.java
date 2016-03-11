@@ -1,7 +1,7 @@
 package org.melancholyworks.runner.job;
 
-import org.melancholyworks.runner.RunnerUtils;
 import org.melancholyworks.runner.FinishListener;
+import org.melancholyworks.runner.RunnersManager;
 import org.melancholyworks.runner.Status;
 import org.melancholyworks.runner.log.LogWriter;
 import org.melancholyworks.runner.task.AbstractTaskRunner;
@@ -19,11 +19,14 @@ public class JobRunner implements Callable<Job> {
     private LogWriter logWriter;
     private Job instance = null;
     private FinishListener finishListener = null;
+    private RunnersManager manager;
+    private AbstractTaskRunner currentRunner = null;
 
-    public JobRunner(Job instance) {
+    public JobRunner(Job instance, RunnersManager manager) {
         this.instance = instance;
         this.instance.setStatus(Status.WAITING);
         this.logWriter = new LogWriter(instance);
+        this.manager = manager;
     }
 
     public void setFinishListener(FinishListener listener) {
@@ -38,9 +41,10 @@ public class JobRunner implements Callable<Job> {
         try {
             for (Task task : instance.getTasks()) {
                 appendLogLine("Command({0}) start. Total [{1}].", instance.getPoint() + 1, instance.getCount());
-                Class runnerClass = RunnerUtils.getRunnerClass(task.getCommand());
+                Class runnerClass = manager.getRunnerClass(task.getCommand());
                 Constructor<AbstractTaskRunner> constructor = runnerClass.getConstructor(Task.class);
                 AbstractTaskRunner runner = constructor.newInstance(task);
+                currentRunner = runner;
                 runner.execute();
                 Status status = Status.fromString(task.getStatus());
                 if (status == Status.FAILED) {
@@ -61,8 +65,8 @@ public class JobRunner implements Callable<Job> {
         }
         if (instance.getStatus().equals(Status.RUNNING.toString())) {
             instance.setStatus(Status.SUCCESS);
-            logWriter.finish();
         }
+        logWriter.finish();
         if (finishListener != null)
             finishListener.onFinish(instance.getJobID());
         instance.setEndTime(new Date());
@@ -79,5 +83,10 @@ public class JobRunner implements Callable<Job> {
 
     public LogWriter getLogWriter() {
         return logWriter;
+    }
+
+    public void stop() {
+        currentRunner.kill();
+        instance.setStatus(Status.KILLED);
     }
 }

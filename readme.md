@@ -6,7 +6,7 @@ Runner aims for providing a simple multi-synchronized-task execution framework.
 
 ### Base Thought
 * Every task can be simplified as a single command with several properties. Like sql queries or commands in shell.
-* ThreadPool provided by Java is simple and easy to use. (I'm not sure it is stable in JavaEE web application. Sometimes tomcat could not be shutdown because undeamon thread.)
+* ThreadPool provided by Java is simple and easy to use. (I'm not sure it is stable in JavaEE web application.)
 * Change a synchronized task to asynchronous task.
 
 ### Constraint
